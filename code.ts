@@ -19,13 +19,15 @@
 /*
   ------------
   7/19/2024: Cleaning up file before publishing updates.
+  !!! Updated version with sections and page links won't work for other users (works for me tho) !!!
+  > 2:12PM: Commenting out file info stuff to see if that helps.
 */
 
 let existingLink = "";
 let fileInfo = [];
 let nodeType = "FRAME";
 
-// /*
+/*
 // These functions were only used to get user input, a feature needed before the file key bug was fixed. 
 
 // const fileInfo = new Map();
@@ -64,12 +66,11 @@ getUserInput().then(() => {
   // figma.ui.postMessage(existingLink);
   figma.ui.postMessage(fileInfo);
 })
-// */
+*/
 
 let tocList = [];
 let existingTOC = null;
 const emojiRegex = "(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?(?:\u200d(?:[^\ud800-\udfff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?)*";
-
 
 // Checks string to see if it includes any keywords from an array of excluded words.
 // If there's a hit, returns true. If clean, returns false.
@@ -91,7 +92,6 @@ function getPageNames() {
     if (!checkStringExcludes(page.name, pageNameExcludes)) {
       console.log("checkStringExcludes: " + checkStringExcludes(page.name, pageNameExcludes));
       pages.push(page.name);
-      // console.log("pushing: " + page.name);
     }
   });
   console.log("Figma page children: " + pages);
@@ -131,8 +131,7 @@ const loadFonts = async () => {
 function populateChildArrays(sourceArr) {
   tocList = [];
   existingTOC = null;
-  // Establishes whether there is an existing TOC
-  for (const node of figma.currentPage.children) {
+  for (const node of figma.currentPage.children) {   // Establishes whether there is an existing TOC
     if (node.name == removeLeadingEmoji(figma.currentPage.name) + " TOC" && node.type === "FRAME" || node.name == "Pages TOC") {
       existingTOC = node;
     }
@@ -239,8 +238,11 @@ function generateLinks() {
   }
 }
 
+figma.showUI(__html__, { themeColors: true, width: 400, height: 450 });
+
 figma.ui.onmessage = msg => {
   loadFonts().then(() => {
+    console.log("STARTUP!!!!")
     getPageNames();
     if (msg.type === 'generate-toc') {
       console.log("--- GENERATE TOC LAUNCHED ---");
