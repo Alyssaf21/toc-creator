@@ -1,0 +1,11 @@
+{
+  "name": "TOC Creator",
+  "id": "1128324373715722194",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": [
+    "figma"
+  ],
+  "ui": "ui.html",
+  "enablePrivatePluginApi": true
+}
