@@ -7,5 +7,9 @@
     "figma"
   ],
   "ui": "ui.html",
-  "enablePrivatePluginApi": true
+  "enablePrivatePluginApi": true,
+  "networkAccess": {
+    "allowedDomains": ["none"
+    ]
+  }
 }
