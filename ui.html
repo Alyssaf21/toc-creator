@@ -45,7 +45,7 @@
   }
 
   .button-column {
-    padding: 16px 0 0 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -62,43 +62,37 @@
   }
 
   button:hover {
-    background-color: var(--figma-color-bg-hover);
+    outline: 2px solid var(--figma-color-border-brand-strong);
   }
 
   .primary-button {
     background-color: var(--figma-color-bg-brand);
-    border: 2px solid var(--figma-color-bg-brand);
     color: var(--figma-color-text-onbrand);
   }
 
-  .primary-button:hover {
-    background-color: var(--figma-color-bg-brand-hover);
-    border: 2px solid var(--figma-color-border-brand-strong);
-  }
-
   .secondary-button {
-    background-color: var(--figma-color-bg);
-    border: 2px solid var(--figma-color-border-brand-strong);
-    color: var(--figma-color-text-brand);
+    background-color: var(--figma-color-bg-brand-secondary);
+    color: var(--figma-color-text-onbrand);
   }
 
   .cancel-button {
-    background-color: white;
+    background-color: var(--figma-color-bg-brand-tertiary);
+    color: var(--figma-color-text-onbrand);
   }
 
-  .cancel-button:hover {
-    background-color: white;
-    color: var(--figma-color-text-hover);
+  .description {
+    font-size: 0.9em;
+    color: var(--figma-color-text-secondary)
   }
 </style>
 
 <h2>Table of Contents Creator</h2>
-<p>
+<p class="description">
   Generate a list of links to each frame on the current page.
   To update an existing table of contents, run the plugin again.
   <!-- <br> Paste a link to the current file below to get started. -->
 </p>
-<p>
+<p class="description">
   <strong>Ignores</strong>: Frames that are hidden, named "Meeting Notes", start with "." or "_", or are unnamed.
   <br> Also removes leading emojis from page names.
 </p>
@@ -106,7 +100,7 @@
 <div class="button-column">
   <button id="pages" class="primary-button">All Pages</button>
   <button id="sections" class="primary-button">All Sections on page</button>
-  <button id="generate" class="primary-button">All frames on page</button>
+  <button id="generate" class="primary-button">All Frames on page</button>
   <button id="selected" class="secondary-button">Selected frames only</button>
   <button id="cancel" class="cancel-button">Cancel</button>
 </div>

@@ -16,10 +16,14 @@
 // CONCEPT: Allow TOC to be generated in-plugin only; does not create a frame on the page, but acts as a floating navigation hub
 // ^^ This is basically just the layers panel if you double-click the layer symbols; Should we just focus on organization and education instead? 
 
+/*
+  ------------
+  7/19/2024: Cleaning up file before publishing updates.
+*/
+
 let existingLink = "";
 let fileInfo = [];
 let nodeType = "FRAME";
-
 
 // /*
 // These functions were only used to get user input, a feature needed before the file key bug was fixed. 
@@ -56,7 +60,7 @@ const getUserInput = async () => {
 }
 
 getUserInput().then(() => {
-  figma.showUI(__html__, { themeColors: true, width: 400, height: 410 });
+  figma.showUI(__html__, { themeColors: true, width: 400, height: 450 });
   // figma.ui.postMessage(existingLink);
   figma.ui.postMessage(fileInfo);
 })
@@ -103,7 +107,6 @@ function getFrameLink(nodeID) {
   console.log("FileName: " + fileName);
   let ID = nodeID.replace(":", "%3A");
   linkString = linkString + figma.fileKey + "/" + fileName + "?node-id=" + ID;
-  // linkString = linkString + fileInfo + "?node-id=" + ID; // Needed when we didn't have the file key
   return linkString;
 }
 
@@ -130,10 +133,9 @@ function populateChildArrays(sourceArr) {
   existingTOC = null;
   // Establishes whether there is an existing TOC
   for (const node of figma.currentPage.children) {
-    // console.log("Node name length after trim: " + node.name.trim().length);
     if (node.name == removeLeadingEmoji(figma.currentPage.name) + " TOC" && node.type === "FRAME" || node.name == "Pages TOC") {
       existingTOC = node;
-    } 
+    }
   }
   for (const node of sourceArr) {
     // Searches for valid nodes (either Frames, Sections, or Pages) to add to the TOC
@@ -200,16 +202,15 @@ function generateLinks() {
   frameTitle.fontName = { family: "Inter", style: "Bold" };
   frameTitle.fontSize = 20;
 
-  if (nodeType == "PAGE") {
-    frameTitle.characters = "Pages";
-  }
+  if (nodeType == "PAGE") { frameTitle.characters = "Pages"; }
 
-  if (existingTOC) {
-    // Append links to existing frame
+  if (existingTOC) { // Append links to existing frame
     existingTOC.appendChild(frameTitle);
-
     for (const link of linkList) { existingTOC.appendChild(link); }
     console.log('APPENDING existingTOC');
+    console.log("CURRENT SELECTION: " + figma.currentPage.selection);
+    figma.currentPage.selection = [existingTOC];
+    figma.viewport.scrollAndZoomIntoView([existingTOC])
   }
   else {
     // Create TOC frame
@@ -232,13 +233,15 @@ function generateLinks() {
       console.log('APPENDING new TOC');
     }
     figma.currentPage.appendChild(frame);
+    console.log("CURRENT SELECTION: " + figma.currentPage.selection);
+    figma.currentPage.selection = [frame];
+    figma.viewport.scrollAndZoomIntoView([frame])
   }
 }
 
 figma.ui.onmessage = msg => {
   loadFonts().then(() => {
     getPageNames();
-    // your HTML page is to use an object with a "type" property like this.
     if (msg.type === 'generate-toc') {
       console.log("--- GENERATE TOC LAUNCHED ---");
       // console.log("Msg Link: " + msg.link);
@@ -249,7 +252,7 @@ figma.ui.onmessage = msg => {
       clearExistingChildren();
       generateLinks();
       figma.commitUndo();
-      figma.notify("Table of Contents generated for all frames on page");
+      figma.notify("Table of Contents generated for all frames on page", { timeout: 4000, error: false });
       // })
     }
 
@@ -260,7 +263,7 @@ figma.ui.onmessage = msg => {
       clearExistingChildren();
       generateLinks();
       figma.commitUndo();
-      figma.notify("Table of Contents generated for all pages");
+      figma.notify("Table of Contents generated for all pages", { timeout: 4000, error: false });
     }
 
     else if (msg.type === 'selected') {
@@ -269,7 +272,7 @@ figma.ui.onmessage = msg => {
       clearExistingChildren();
       generateLinks();
       figma.commitUndo();
-      figma.notify("Table of Contents generated for selected frames");
+      figma.notify("Table of Contents generated for selected frames", { timeout: 4000, error: false });
     }
 
     else if (msg.type === 'sections') {
@@ -279,12 +282,9 @@ figma.ui.onmessage = msg => {
       clearExistingChildren();
       generateLinks();
       figma.commitUndo();
-      figma.notify("Table of Contents generated for all sections on page");
+      figma.notify("Table of Contents generated for all sections on page", { timeout: 4000, error: false });
     }
 
-
-    // Make sure to close the plugin when you're done. Otherwise the plugin will
-    // keep running, which shows the cancel button at the bottom of the screen.
     loadFonts().then(() => {
       figma.closePlugin();
     })
