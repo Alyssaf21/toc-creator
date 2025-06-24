@@ -35,7 +35,6 @@
   }
 
   .input-label {
-    /* text-transform:uppercase; */
     font-size: 14px;
     font-weight: 600;
   }
@@ -54,7 +53,6 @@
   button {
     font-size: 16px;
     font-weight: 500;
-    /* display: block; */
     cursor: pointer;
     padding: 10px 3px;
     border: none;
@@ -90,7 +88,6 @@
 <p class="description">
   Generate a list of links to each frame on the current page.
   To update an existing table of contents, run the plugin again.
-  <!-- <br> Paste a link to the current file below to get started. -->
 </p>
 <p class="description">
   <strong>Ignores</strong>: Frames that are hidden, named "Meeting Notes", start with "." or "_", or are unnamed.
@@ -105,68 +102,15 @@
   <button id="cancel" class="cancel-button">Cancel</button>
 </div>
 <script>
-  onmessage = (event) => {
-    // console.log("got this from the plugin code", event.data.pluginMessage)
-    // let map1 = event.data.pluginMessage;
-    // document.getElementById('file-link').value = map1[0];
-    // document.getElementById('file-name').innerHTML = "<em>Last file used: <strong>" + decodeURI(map1[1]) + "</strong></em>";
-  }
-
-  // window.onload = function () {
-  //   var input = document.getElementById('file-link');
-  //   input.focus();
-  //   input.select();
-  // }
-
-
   function validateInput() {
-    // let x = document.getElementById('file-link').value;
-    if (!x.includes("https://www.figma.com/file/", 0)) {
-      return false;
-    }
+    if (!x.includes("https://www.figma.com/file/", 0)) { return false; }
     return true;
   }
 
-  function showErrorMsg() {
-    // Only has 1 message type for now; in future, make switch statement and use number code as arg for multiple error scenarios
-    let sysMsg;
-
-    sysMsg = "<strong>Current file link required.</strong> \n Go to the upper-right \"Share\" button, click \"Copy Link\" and paste it into the 'File Link' field."
-    document.getElementById("system-message").innerHTML = sysMsg;
-  }
-
-  document.getElementById('pages').onclick = () => {
-    parent.postMessage({ pluginMessage: { type: 'pages' } }, '*')
-  }
-
-  document.getElementById('sections').onclick = () => {
-    parent.postMessage({ pluginMessage: { type: 'sections' } }, '*')
-  }
-
-  document.getElementById('generate').onclick = () => {
-    parent.postMessage({ pluginMessage: { type: 'generate-toc' } }, '*');
-    // if (validateInput()) {
-    // let fileLink = document.getElementById('file-link').value;
-    // parent.postMessage({ pluginMessage: { type: 'generate-toc', link: fileLink } }, '*');
-    // parent.postMessage({ pluginMessage: { type: 'generate-toc' } }, '*');
-    // } else {
-    // showErrorMsg();
-    // }
-  }
-
-  document.getElementById('selected').onclick = () => {
-    parent.postMessage({ pluginMessage: { type: 'selected' } }, '*');
-    // if (validateInput()) {
-    // let fileLink = document.getElementById('file-link').value;
-    // parent.postMessage({ pluginMessage: { type: 'selected', link: fileLink } }, '*');
-    // parent.postMessage({ pluginMessage: { type: 'selected' } }, '*');
-    // } else {
-    // showErrorMsg();
-    // }
-  }
-
-  document.getElementById('cancel').onclick = () => {
-    parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
-  }
+  document.getElementById('pages').onclick = () => { parent.postMessage({ pluginMessage: { type: 'pages' } }, '*') }
+  document.getElementById('sections').onclick = () => { parent.postMessage({ pluginMessage: { type: 'sections' } }, '*') }
+  document.getElementById('generate').onclick = () => { parent.postMessage({ pluginMessage: { type: 'generate-toc' } }, '*'); }
+  document.getElementById('selected').onclick = () => { parent.postMessage({ pluginMessage: { type: 'selected' } }, '*'); }
+  document.getElementById('cancel').onclick = () => { parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*') }
 
 </script>

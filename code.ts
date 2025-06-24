@@ -16,58 +16,9 @@
 // CONCEPT: Allow TOC to be generated in-plugin only; does not create a frame on the page, but acts as a floating navigation hub
 // ^^ This is basically just the layers panel if you double-click the layer symbols; Should we just focus on organization and education instead? 
 
-/*
-  ------------
-  7/19/2024: Cleaning up file before publishing updates.
-  !!! Updated version with sections and page links won't work for other users (works for me tho) !!!
-  > 2:12PM: Commenting out file info stuff to see if that helps.
-*/
-
 let existingLink = "";
 let fileInfo = [];
 let nodeType = "FRAME";
-
-/*
-// These functions were only used to get user input, a feature needed before the file key bug was fixed. 
-
-// const fileInfo = new Map();
-
-const setUserInput = async () => {
-  if (existingLink.length > 1) {
-    await figma.clientStorage.setAsync("link", existingLink);
-  } else {
-    await figma.clientStorage.setAsync("link", "");
-  }
-}
-
-function parseFileName(fileLink) {
-  let linkString = "https://www.figma.com/file/";
-  let fileName = fileLink.split(linkString).splice(1).toString();
-  fileName = fileName.split('?')[0];
-  fileName = fileName.split('/')[1];
-  fileName = fileName.replace(/-/g, " ");
-  console.log("File Name: " + fileName);
-  return fileName;
-}
-
-const getUserInput = async () => {
-  existingLink = await figma.clientStorage.getAsync("link");
-  if (existingLink.length > 1) {
-    console.log("Existing Link available: " + existingLink);
-    fileInfo.push(existingLink);
-    fileInfo.push(parseFileName(existingLink));
-  } else {
-    console.log("No Existing Link Found");
-  }
-}
-
-getUserInput().then(() => {
-  figma.showUI(__html__, { themeColors: true, width: 400, height: 450 });
-  // figma.ui.postMessage(existingLink);
-  figma.ui.postMessage(fileInfo);
-})
-*/
-
 let tocList = [];
 let existingTOC = null;
 const emojiRegex = "(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?(?:\u200d(?:[^\ud800-\udfff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?)*";
@@ -138,20 +89,14 @@ function populateChildArrays(sourceArr) {
   }
   for (const node of sourceArr) {
     // Searches for valid nodes (either Frames, Sections, or Pages) to add to the TOC
-    if (node.type !== "FRAME" && node.type !== "SECTION" && node.type !== "PAGE") {
-      continue;
-    }
+    if (node.type !== "FRAME" && node.type !== "SECTION" && node.type !== "PAGE") { continue; }
     else if (node.name.startsWith(".") || node.name.startsWith("_") || node.name.startsWith("Meeting Notes") || node.name.trim().length < 1 || node.visible == false) {
       // Skip if frame starts with ., _, "Meeting Notes", only contains whitespace, or is hidden.
       console.log("FRAME NAME INCLUDES ESC CHAR");
       continue;
     }
-    else if (node.name == removeLeadingEmoji(figma.currentPage.name) + " TOC") {
-      continue;
-    }
-    else if (node.children.length == 0) {
-      continue;
-    }
+    else if (node.name == removeLeadingEmoji(figma.currentPage.name) + " TOC") { continue; }
+    else if (node.children.length == 0) { continue; }
     else {
       if (nodeType == "FRAME" && node.type === "FRAME") {
         console.log("Node type is FRAME");
@@ -174,9 +119,7 @@ function populateChildArrays(sourceArr) {
 function clearExistingChildren() {
   if (existingTOC) {
     console.log("Existing Chilren: " + existingTOC.children);
-    existingTOC.children.forEach(element => {
-      element.remove();
-    });
+    existingTOC.children.forEach(element => { element.remove(); });
   }
 }
 
@@ -246,16 +189,11 @@ figma.ui.onmessage = msg => {
     getPageNames();
     if (msg.type === 'generate-toc') {
       console.log("--- GENERATE TOC LAUNCHED ---");
-      // console.log("Msg Link: " + msg.link);
-      // existingLink = msg.link;
-      // console.log("Calling setUserInput");
-      // setUserInput().then(() => {
       populateChildArrays(figma.currentPage.children);
       clearExistingChildren();
       generateLinks();
       figma.commitUndo();
       figma.notify("Table of Contents generated for all frames on page", { timeout: 4000, error: false });
-      // })
     }
 
     else if (msg.type === 'pages') {
