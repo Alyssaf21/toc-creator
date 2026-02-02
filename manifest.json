@@ -1,6 +1,7 @@
 {
   "name": "TOC Creator",
-  "id": "1128324373715722194",
+  "id": "1519398362585843338",
+  "documentAccess": "dynamic-page",
   "api": "1.0.0",
   "main": "code.js",
   "editorType": [
@@ -9,7 +10,8 @@
   "ui": "ui.html",
   "enablePrivatePluginApi": true,
   "networkAccess": {
-    "allowedDomains": ["none"
+    "allowedDomains": [
+      "none"
     ]
   }
 }

@@ -52,10 +52,9 @@ function getFrameLink(nodeID) {
   // For some reason, Figma won't recognize the transfer protocol for section links but will for frame links.
   // So http will work for Sections, but will launch the opening of a browser tab when a link is clicked.
   // https will smoothly pan/zoom/select the linked object without leaving the editor, but doesn't work for sections.  
-  let linkString = "https://www.figma.com/file/";
+  let linkString = "https://www.figma.com/design/";
   let fileName = figma.root.name.replace(/ /g, "-"); // Replace all spaces in the file name with "-" to create a link
-  fileName = fileName.replace(/ /g, "-"); // Char for non-breaking space. I found one in the title of an Explore Mobile file
-  console.log("FileName: " + fileName);
+  fileName = fileName.replace(/ /g, "-"); // Char for non-breaking space. I found one in the title of an old file once
   let ID = nodeID.replace(":", "%3A");
   linkString = linkString + figma.fileKey + "/" + fileName + "?node-id=" + ID;
   return linkString;
@@ -108,7 +107,7 @@ function populateChildArrays(sourceArr) {
         console.log("Node type is PAGE");
         tocList.push(node);
       } else {
-        console.log("NEITHER!!!");
+        console.log("Node type is NOT a frame, section, or page.");
       }
     }
   }
@@ -118,7 +117,7 @@ function populateChildArrays(sourceArr) {
 // Removes all links from the existing TOC
 function clearExistingChildren() {
   if (existingTOC) {
-    console.log("Existing Chilren: " + existingTOC.children);
+    // console.log("Existing Chilren: " + existingTOC.children);
     existingTOC.children.forEach(element => { element.remove(); });
   }
 }
@@ -132,7 +131,6 @@ function generateLinks() {
     linkText.fontName = { family: "Inter", style: "Medium" };
     linkText.fontSize = 16;
     linkText.characters = node.name;
-    console.log("Figma HATES this link: " + getFrameLink(node.id));
     linkText.hyperlink = { type: "URL", value: getFrameLink(node.id) };
     linkText.textDecoration = "UNDERLINE";
     linkText.fills = [{ type: 'SOLID', color: { r: 0.1, g: 0.5, b: 1 } }];
@@ -185,7 +183,7 @@ figma.showUI(__html__, { themeColors: true, width: 400, height: 450 });
 
 figma.ui.onmessage = msg => {
   loadFonts().then(() => {
-    console.log("STARTUP!!!!")
+    console.log("STARTING TABLE OF CONTENTS CREATOR")
     getPageNames();
     if (msg.type === 'generate-toc') {
       console.log("--- GENERATE TOC LAUNCHED ---");
