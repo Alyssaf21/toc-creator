@@ -7,6 +7,7 @@
     flex-direction: column;
     margin-top: 0;
     padding: 10px;
+    gap: 0.5rem;
   }
 
   h2 {
@@ -17,44 +18,72 @@
     margin: 8px 0;
   }
 
-  .input-field {
+  #input-container {
     display: flex;
     flex-direction: column;
-    margin-bottom: 16px;
+    padding: 0.75rem;
+    background-color: var(--figma-color-bg-secondary);
+    gap: 0.5rem;
+    border-radius: 1rem;
   }
 
-  .input-field>input {
+  #input-wrapper {
+    display: flex;
+    gap: 0.25rem;
+    height: fit-content;
+    font-size: 13px;
+    letter-spacing: 0.05rem;
+    flex-direction: column;
+  }
+
+  input {
     font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     padding: 8px;
     border: 2px solid var(--figma-color-border-brand);
     border-radius: 4px;
+    font-size: 14px !important;
+    width: 100%;
   }
 
-  .input-field>input:focus-visible {
+  input:focus-visible,
+  button:focus-visible {
     outline: 3px solid var(--figma-color-border-brand-strong);
   }
 
   .input-label {
-    font-size: 14px;
-    font-weight: 600;
+    margin: 0 2px;
+    font-size: 12px;
+    letter-spacing: 0.75px;
+    color: var(--figma-color-text-secondary);
+    font-weight: 300;
   }
 
-  #system-message {
-    color: var(--figma-color-text-danger);
-  }
-
-  .button-column {
-    padding: 0;
+  #text-box {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .error-msg {
+    color: var(--figma-color-text-danger);
+    font-size: 0.9rem;
+    margin: 0 2px;
+  }
+
+  .button-container {
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* flex-direction: column; */
     gap: 8px;
   }
 
   button {
-    font-size: 16px;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 15px;
     font-weight: 500;
     cursor: pointer;
-    padding: 10px 3px;
+    padding: 10px 8px;
     border: none;
     border-radius: 4px;
   }
@@ -62,6 +91,15 @@
   button:hover {
     outline: 2px solid var(--figma-color-border-brand-strong);
   }
+
+  button[disabled="true"] {
+    background-color: var(--figma-color-bg-disabled);
+    color: var(--figma-color-text-disabled);
+    outline: none;
+    cursor: default;
+  }
+
+
 
   .primary-button {
     background-color: var(--figma-color-bg-brand);
@@ -74,43 +112,134 @@
   }
 
   .cancel-button {
-    background-color: var(--figma-color-bg-brand-tertiary);
+    background-color: var(--figma-color-bg-tertiary);
     color: var(--figma-color-text-onbrand);
   }
 
   .description {
     font-size: 0.9em;
-    color: var(--figma-color-text-secondary)
+    color: var(--figma-color-text-secondary);
+    font-weight: 300;
   }
 </style>
 
-<h2>Table of Contents Creator</h2>
-<p class="description">
-  Generate a list of links to each frame on the current page.
-  To update an existing table of contents, run the plugin again.
-</p>
+<div class="">
+  <p>⚠️ <strong>Important</strong></p>
+  <p class="description">
+    Paste the file link (Share > Copy Link) below to ensure your links will redirect to the correct file.
+  </p>
+</div>
+
+<!-- The following is needed when private plugin API is unavailable, like publicly published plugins -->
+<div id="input-container">
+  <div id="input-wrapper">
+    <p class="input-label">File Link</p>
+    <div id="text-box"><input id="file-link" type="text" value="" placeholder="Share -> Copy Link">
+      <button id="update-link" class="secondary-button">Update</button>
+    </div>
+  </div>
+  <div id="add-error-msg" class="error-msg"> </div>
+  <div id="file-name" class=""> </div>
+</div>
+
 <p class="description">
   <strong>Ignores</strong>: Frames that are hidden, named "Meeting Notes", start with "." or "_", or are unnamed.
   <br> Also removes leading emojis from page names.
 </p>
-<p id="system-message"></p>
-<div class="button-column">
-  <button id="pages" class="primary-button">All Pages</button>
-  <button id="sections" class="primary-button">All Sections on page</button>
-  <button id="generate" class="primary-button">All Frames on page</button>
-  <button id="selected" class="secondary-button">Selected frames only</button>
-  <button id="cancel" class="cancel-button">Cancel</button>
+<div id="button-container" class="button-container">
+  <button id="pages" class="primary-button" disabled="false">All Pages</button>
+  <button id="selected" class="primary-button" disabled="false">Selected Frames and Sections</button>
+  <button id="sections" class="primary-button" disabled="false">All Sections on Page</button>
+  <button id="generate" class="primary-button" disabled="false">All Frames on Page</button>
+  <!-- <button id="cancel" class="cancel-button" disabled="false">Cancel</button> -->
 </div>
+
 <script>
-  function validateInput() {
-    if (!x.includes("https://www.figma.com/file/", 0)) { return false; }
-    return true;
+  var fileTitle = "";
+
+  function toggleButtonState(btnContainerId, bool) { // Enables and disables multiple buttons when given its parent container
+    let container = document.getElementById(btnContainerId);
+    if (container.children != 0) {
+      if (bool == true) { // if bool arg is true, enable. If false, disable the buttons
+        for (const child of container.children) {
+          child.removeAttribute('disabled');
+        }
+      } else {
+        for (const child of container.children) {
+
+          child.setAttribute('disabled', true);
+        }
+      }
+    }
   }
 
+  function extractFileName(linkText) { // Takes a Figma link and extracts the file title. Very basic, doesn't account for special characters
+    let extractedName = linkText.split("/")[5];
+    extractedName = decodeURIComponent(extractedName.split("?node-id")[0]);
+    extractedName = extractedName.replace(/\-/g, ' ');
+    return extractedName;
+  }
+
+  function displayMsg(msg, container) { // Displays message on UI and hides the parent container if none
+    let msgContainer = document.getElementById(container);
+    msgContainer.innerHTML = "";
+    if (msg == "clear") {
+      msgContainer.style.display = "none";
+    } else {
+      let errorFeedback = document.createTextNode(msg);
+      msgContainer.appendChild(errorFeedback);
+      msgContainer.style.display = "inherit";
+    }
+  }
+
+  function validateLink(linkText) {
+    if (linkText == "") { // Display error if input is empty
+      displayMsg("Please add a link to the current file", "add-error-msg");
+      fileTitle = "";
+      return false;
+    }
+    else if (!linkText.includes("https://www.figma.com/design/")) { // Display error if input lacks figma design url format
+      displayMsg("Invalid link", "add-error-msg");
+      fileTitle = "";
+      return false;
+    } else { // Passes validation: Clear error messages, extract file name from URL
+      displayMsg("clear", "add-error-msg");
+      fileTitle = extractFileName(linkText);
+      toggleButtonState("button-container", true);
+      return true;
+    }
+  }
+
+  function showFileTitle() { // Updates file name on UI
+    let inputBox = document.getElementById("file-name");
+    inputBox.innerHTML = "";
+    let fileTitleText = document.createTextNode(fileTitle);
+    inputBox.appendChild(fileTitleText);
+    inputBox.style.display = "inherit";
+    toggleButtonState("button-container", true);
+  }
+
+  onmessage = (event) => { // When code.ts sends a file link, update file name 
+    validateLink(event.data.pluginMessage);
+    showFileTitle();
+    const textbox = document.getElementById('file-link');
+    textbox.value = event.data.pluginMessage;
+  }
+
+  if (fileTitle == "") { toggleButtonState("button-container", false); } // If no file link has been added, disable the 'create' buttons
+
+  document.getElementById('update-link').onclick = () => { // Validates file link input, sends to code.ts
+    const textbox = document.getElementById('file-link');
+    const newFileLink = textbox.value;
+    if (validateLink(newFileLink)) {
+      parent.postMessage({ pluginMessage: { type: 'file-link', value: newFileLink } }, '*');
+      showFileTitle();
+    }
+  }
   document.getElementById('pages').onclick = () => { parent.postMessage({ pluginMessage: { type: 'pages' } }, '*') }
   document.getElementById('sections').onclick = () => { parent.postMessage({ pluginMessage: { type: 'sections' } }, '*') }
   document.getElementById('generate').onclick = () => { parent.postMessage({ pluginMessage: { type: 'generate-toc' } }, '*'); }
   document.getElementById('selected').onclick = () => { parent.postMessage({ pluginMessage: { type: 'selected' } }, '*'); }
-  document.getElementById('cancel').onclick = () => { parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*') }
+  // document.getElementById('cancel').onclick = () => { parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*') }
 
 </script>
